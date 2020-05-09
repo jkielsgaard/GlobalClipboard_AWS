@@ -1,0 +1,14 @@
+version: 0.2
+
+phases:
+    build:
+        commands:
+            - echo Building...
+            - mkdir build-output
+            - cp -R './Lambda/globalclipboard_backend.py' build-output
+            - cp -R './Lambda/globalclipboard_updater.py' build-output
+            - cp -R './CloudFormation/globalclipboard_cfscript_dev.yaml' build-output
+            - cp -R './CloudFormation/globalclipboard_cfscript_prod.yaml' build-output
+artifacts:
+    files:
+        - /**/*
