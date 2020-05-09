@@ -127,7 +127,7 @@ Resources:
             Environment:
                 Variables:
                    BUCKET_NAME: !Sub "${GlobalClipboardName}-blockbucket-${GlobalClipboardHEXID}"
-            Handler: "globalclipboard_backend.lambda_handler"
+            Handler: "Lambda/globalclipboard_backend.lambda_handler"
             MemorySize: 128
             Role: !GetAtt "GlobalClipboardBackendLambdaIAMRole.Arn"
             Runtime: "python3.7"
@@ -218,7 +218,7 @@ Resources:
                     BUCKET_NAME: 'download.cloudberrycode.com'
                     BUCKET_KEY: 'globalclipboard/globalclipboard_backend.zip'
                     LAMBDA_FUNCTION: !Ref GlobalClipboardBackendLambda
-            Handler: "globalclipboard_updater.lambda_handler"
+            Handler: "Lambda/globalclipboard_updater.lambda_handler"
             MemorySize: 128
             Role: !GetAtt "GlobalClipboardUpdaterLambdaIAMRole.Arn"
             Runtime: "python3.7"
