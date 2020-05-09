@@ -2,7 +2,7 @@ import boto3
 import os
 import json
 
-print('Loading Lambda function')
+print('Loading Lambdafunction')
 s3 = boto3.resource('s3')
 
 
