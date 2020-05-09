@@ -216,7 +216,7 @@ Resources:
             Environment:
                 Variables:
                     BUCKET_NAME: 'download.cloudberrycode.com'
-                    BUCKET_KEY: 'globalclipboard/globalclipboard_backend.zip'
+                    BUCKET_KEY: 'globalclipboard/Lambda/globalclipboard_backend.zip'
                     LAMBDA_FUNCTION: !Ref GlobalClipboardBackendLambda
             Handler: "Lambda/globalclipboard_updater.lambda_handler"
             MemorySize: 128
