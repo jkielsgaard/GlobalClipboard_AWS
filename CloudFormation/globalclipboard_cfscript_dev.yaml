@@ -121,7 +121,7 @@ Resources:
         Properties:
             Code:
                 S3Bucket: 'download.cloudberrycode.com'
-                S3Key: 'globalclipboard/globalclipboard_backend.zip'
+                S3Key: 'globalclipboard/Lambda/globalclipboard_backend.zip'
             Description: "Backend Lambda to GlobalClipboard Service"
             FunctionName: !Sub "${GlobalClipboardName}-backend"
             Environment:
@@ -210,7 +210,7 @@ Resources:
         Properties:
             Code:
                 S3Bucket: 'download.cloudberrycode.com'
-                S3Key: 'globalclipboard/globalclipboard_updater.zip'
+                S3Key: 'globalclipboard/Lambda/globalclipboard_updater.zip'
             Description: "Backend Lambda to GlobalClipboard Service"
             FunctionName: !Sub "${GlobalClipboardName}-updater"
             Environment:
