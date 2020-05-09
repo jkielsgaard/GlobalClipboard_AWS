@@ -8,12 +8,32 @@ Parameters:
     GlobalClipboardName:
         Type:           String
         Description:    This parameter will be used on different resources to make this setup unique
-        Default:        "globalclipboard-dev"
+        Default:        "globalclipboard"
     
     GlobalClipboardHEXID:
         Type:           String
         Description:    Unique 8 hex ID, bucket will be "<GlobalClipboardName>-blockbucket-<GlobalClipboardHEXID>"
         Default:        "eb8dc53e"
+    
+    GlobalClipboardEnv:
+            Type:           String
+            Description:    Set env state
+            Default:        "dev"
+            AllowedValues: [
+                "dev",
+                "prod"
+            ]
+
+Metadata: 
+    AWS::CloudFormation::Interface: 
+        ParameterGroups: 
+        - 
+            Label:
+                default: "GlobalClipboard Configuration"
+            Parameters: 
+                - GlobalClipboardName
+                - GlobalClipboardEnv
+                - GlobalClipboardHEXID
 
 Resources:
 
@@ -22,7 +42,7 @@ Resources:
     apiGateway:
         Type: "AWS::ApiGateway::RestApi"
         Properties:
-            Name: !Sub "${GlobalClipboardName}-API"
+            Name: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-API"
             Description: "API to GlobalClipboard Service"
             ApiKeySourceType: HEADER
             EndpointConfiguration:
@@ -67,14 +87,14 @@ Resources:
             ApiStages:
                 - ApiId: !Ref "apiGateway"
                   Stage: !Ref "apiGatewayStage"
-            UsagePlanName: !Sub "${GlobalClipboardName}-APIUsagePlan"
+            UsagePlanName: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-APIUsagePlan"
    
     apiGatewayAPIKey:
         Type: "AWS::ApiGateway::ApiKey"
         Properties:
             Enabled: true
             GenerateDistinctId: true
-            Name: !Sub "${GlobalClipboardName}-APIKey"
+            Name: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-APIKey"
 
     apiGatewayUsagePlanKey:
         Type: "AWS::ApiGateway::UsagePlanKey"
@@ -110,7 +130,7 @@ Resources:
                   DataTraceEnabled: 'true'
                   ThrottlingBurstLimit: '999'
             RestApiId: !Ref "apiGateway"
-            StageName: !Sub "${GlobalClipboardName}-APIstage"   
+            StageName: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-APIstage"   
     
 
 
@@ -121,13 +141,13 @@ Resources:
         Properties:
             Code:
                 S3Bucket: 'download.cloudberrycode.com'
-                S3Key: 'globalclipboard/Lambda/globalclipboard_backend.zip'
+                S3Key: 'globalclipboard/Lambda/${GlobalClipboardEnv}/globalclipboard_backend.zip'
             Description: "Backend Lambda to GlobalClipboard Service"
-            FunctionName: !Sub "${GlobalClipboardName}-backend"
+            FunctionName: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-backend"
             Environment:
                 Variables:
-                   BUCKET_NAME: !Sub "${GlobalClipboardName}-blockbucket-${GlobalClipboardHEXID}"
-            Handler: "Lambda/globalclipboard_backend.lambda_handler"
+                   BUCKET_NAME: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-blockbucket-${GlobalClipboardHEXID}"
+            Handler: "Lambda/${GlobalClipboardEnv}/globalclipboard_backend.lambda_handler"
             MemorySize: 128
             Role: !GetAtt "GlobalClipboardBackendLambdaIAMRole.Arn"
             Runtime: "python3.7"
@@ -171,8 +191,8 @@ Resources:
                             - "logs:PutLogEvents"
                           Effect: "Allow"
                           Resource:
-                            - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/GlobalClipboard_Backend:*"
-                  PolicyName: !Sub "${GlobalClipboardName}-Lambda"
+                            - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${GlobalClipboardName}-${GlobalClipboardEnv}-backend:*"
+                  PolicyName: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-Lambda"
                 - PolicyDocument:
                     Version: "2012-10-17"
                     Statement:
@@ -180,14 +200,14 @@ Resources:
                             - "s3:*"
                           Effect: "Allow"
                           Resource:
-                            - !Sub "arn:aws:s3:::${GlobalClipboardName}-blockbucket-${GlobalClipboardHEXID}"
-                            - !Sub "arn:aws:s3:::${GlobalClipboardName}-blockbucket-${GlobalClipboardHEXID}/*"
+                            - !Sub "arn:aws:s3:::${GlobalClipboardName}-${GlobalClipboardEnv}-blockbucket-${GlobalClipboardHEXID}"
+                            - !Sub "arn:aws:s3:::${GlobalClipboardName}-${GlobalClipboardEnv}-blockbucket-${GlobalClipboardHEXID}/*"
                   PolicyName: !Sub "${GlobalClipboardName}-S3"
 
     GlobalClipboardBackendLambdaLogGroup:
         Type: "AWS::Logs::LogGroup"
         Properties:
-            LogGroupName: !Sub "/aws/lambda/${GlobalClipboardName}-Backend"
+            LogGroupName: !Sub "/aws/lambda/${GlobalClipboardName}-${GlobalClipboardEnv}-backend"
             RetentionInDays: 30
 
 ##  GlobalClipboard S3 blocks
@@ -195,7 +215,7 @@ Resources:
     S3bucket:
         Type: "AWS::S3::Bucket"
         Properties:
-            BucketName: !Sub "${GlobalClipboardName}-blockbucket-${GlobalClipboardHEXID}"
+            BucketName: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-blockbucket-${GlobalClipboardHEXID}"
             LifecycleConfiguration:
                 Rules:
                     - Id: DeleteBlockAfter7Days
@@ -210,15 +230,15 @@ Resources:
         Properties:
             Code:
                 S3Bucket: 'download.cloudberrycode.com'
-                S3Key: 'globalclipboard/Lambda/globalclipboard_updater.zip'
+                S3Key: 'globalclipboard/Lambda/${GlobalClipboardEnv}/globalclipboard_updater.zip'
             Description: "Backend Lambda to GlobalClipboard Service"
-            FunctionName: !Sub "${GlobalClipboardName}-updater"
+            FunctionName: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-updater"
             Environment:
                 Variables:
                     BUCKET_NAME: 'download.cloudberrycode.com'
-                    BUCKET_KEY: 'globalclipboard/Lambda/globalclipboard_backend.zip'
+                    BUCKET_KEY: 'globalclipboard/Lambda/${GlobalClipboardEnv}/globalclipboard_backend.zip'
                     LAMBDA_FUNCTION: !Ref GlobalClipboardBackendLambda
-            Handler: "Lambda/globalclipboard_updater.lambda_handler"
+            Handler: "Lambda/${GlobalClipboardEnv}/globalclipboard_updater.lambda_handler"
             MemorySize: 128
             Role: !GetAtt "GlobalClipboardUpdaterLambdaIAMRole.Arn"
             Runtime: "python3.7"
@@ -246,8 +266,8 @@ Resources:
                             - "logs:PutLogEvents"
                           Effect: "Allow"
                           Resource:
-                            - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/GlobalClipboard_Backend:*"
-                  PolicyName: !Sub "${GlobalClipboardName}-LogUpdater"
+                            - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${GlobalClipboardName}-${GlobalClipboardEnv}-updater:*"
+                  PolicyName: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-LogUpdater"
                 - PolicyDocument:
                     Version: "2012-10-17"
                     Statement:
@@ -255,11 +275,11 @@ Resources:
                             - "lambda:UpdateFunctionCode"
                           Effect: "Allow"
                           Resource:
-                            - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${GlobalClipboardName}-Backend"
-                  PolicyName: !Sub "${GlobalClipboardName}-updater"
+                            - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${GlobalClipboardName}-${GlobalClipboardEnv}-updater"
+                  PolicyName: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-updater"
 
     GlobalClipboardUpdaterLambdaLogGroup:
         Type: "AWS::Logs::LogGroup"
         Properties:
-            LogGroupName: !Sub "/aws/lambda/${GlobalClipboardName}-updater"
+            LogGroupName: !Sub "/aws/lambda/${GlobalClipboardName}-${GlobalClipboardEnv}-update"
             RetentionInDays: 30
