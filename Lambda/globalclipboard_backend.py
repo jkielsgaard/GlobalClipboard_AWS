@@ -2,7 +2,7 @@ import boto3
 import os
 import json
 
-print('Loading Lambdafunction')
+print('Loading GlobalClipboard Lambda function')
 s3 = boto3.resource('s3')
 
 
