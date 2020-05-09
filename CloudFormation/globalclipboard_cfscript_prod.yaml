@@ -13,7 +13,7 @@ Parameters:
     GlobalClipboardHEXID:
         Type:           String
         Description:    Unique 8 hex ID, bucket will be "<GlobalClipboardName>-blockbucket-<GlobalClipboardHEXID>"
-        Default:        "eb8dc53e"
+        Default:        "eb8dc53c"
 
 Resources:
 
