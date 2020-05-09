@@ -4,14 +4,12 @@ phases:
     build:
         commands:
             - echo Building...
-            - mkdir LambdaFunctions
-            # - mkdir CloudFormationScripts
             - zip globalclipboard_backend.zip ./Lambda/globalclipboard_backend.py
-            # - cp -R globalclipboard_backend.zip LambdaFunctions
+            - rm ./Lambda/globalclipboard_backend.py
+            - cp -R globalclipboard_backend.zip Lambda
             - zip globalclipboard_updater.zip ./Lambda/globalclipboard_updater.py
-            # - cp -R globalclipboard_updater.zip LambdaFunctions
-            # - cp -R ./CloudFormation/globalclipboard_cfscript_dev.yaml CloudFormationScripts
-            # - cp -R ./CloudFormation/globalclipboard_cfscript_prod.yaml CloudFormationScripts
+            - rm ./Lambda/globalclipboard_updater.py
+            - cp -R globalclipboard_updater.zip Lambda
 artifacts:
     files:
         - Lambda/**/*
