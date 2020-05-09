@@ -16,13 +16,13 @@ Parameters:
         Default:        "eb8dc53e"
     
     GlobalClipboardEnv:
-            Type:           String
-            Description:    Set env state
-            Default:        "dev"
-            AllowedValues: [
-                "dev",
-                "prod"
-            ]
+        Type:           String
+        Description:    Set env state
+        Default:        "dev"
+        AllowedValues: [
+            "dev",
+            "prod"
+        ]
 
 Metadata: 
     AWS::CloudFormation::Interface: 
@@ -42,9 +42,9 @@ Resources:
     apiGateway:
         Type: "AWS::ApiGateway::RestApi"
         Properties:
-            Name: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-API"
-            Description: "API to GlobalClipboard Service"
-            ApiKeySourceType: HEADER
+            Name:               !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-API"
+            Description:        "API to GlobalClipboard Service"
+            ApiKeySourceType:   HEADER
             EndpointConfiguration:
                 Types:
                     - "REGIONAL"
@@ -52,14 +52,14 @@ Resources:
     apiGatewayPOSTMethod:
         Type: "AWS::ApiGateway::Method"
         Properties:
-            ApiKeyRequired: true
-            AuthorizationType: "NONE"
-            HttpMethod: "POST"
-            ResourceId: !GetAtt "apiGateway.RootResourceId"
-            RestApiId: !Ref "apiGateway"
+            ApiKeyRequired:     true
+            AuthorizationType:  "NONE"
+            HttpMethod:         "POST"
+            ResourceId:         !GetAtt "apiGateway.RootResourceId"
+            RestApiId:          !Ref "apiGateway"
             Integration:
-                IntegrationHttpMethod: "POST"
-                Type: "AWS_PROXY"
+                IntegrationHttpMethod:  "POST"
+                Type:                   "AWS_PROXY"
                 Uri: !Sub
                     - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
                     - lambdaArn: !GetAtt "GlobalClipboardBackendLambda.Arn"
@@ -67,14 +67,14 @@ Resources:
     apiGatewayGETMethod:
         Type: "AWS::ApiGateway::Method"
         Properties:
-            ApiKeyRequired: false
-            AuthorizationType: "NONE"
-            HttpMethod: "GET"
-            ResourceId: !GetAtt "apiGateway.RootResourceId"
-            RestApiId: !Ref "apiGateway"
+            ApiKeyRequired:     false
+            AuthorizationType:  "NONE"
+            HttpMethod:         "GET"
+            ResourceId:         !GetAtt "apiGateway.RootResourceId"
+            RestApiId:          !Ref "apiGateway"
             Integration:
-                IntegrationHttpMethod: "POST"
-                Type: "AWS_PROXY"
+                IntegrationHttpMethod:  "POST"
+                Type:                   "AWS_PROXY"
                 Uri: !Sub
                     - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
                     - lambdaArn: !GetAtt "GlobalClipboardBackendLambda.Arn"
@@ -92,7 +92,7 @@ Resources:
     apiGatewayAPIKey:
         Type: "AWS::ApiGateway::ApiKey"
         Properties:
-            Enabled: true
+            Enabled:            true
             GenerateDistinctId: true
             Name: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-APIKey"
 
@@ -102,9 +102,9 @@ Resources:
             - "apiGatewayPOSTMethod"
             - "apiGatewayGETMethod"
         Properties:
-            UsagePlanId: !Ref "apiGatewayUsagePlan"
-            KeyId: !Ref "apiGatewayAPIKey"
-            KeyType: "API_KEY"
+            UsagePlanId:    !Ref "apiGatewayUsagePlan"
+            KeyId:          !Ref "apiGatewayAPIKey"
+            KeyType:        "API_KEY"
 
     apiGatewayDeployment:
         Type: "AWS::ApiGateway::Deployment"
@@ -119,16 +119,16 @@ Resources:
         Properties:
             DeploymentId: !Ref "apiGatewayDeployment"
             MethodSettings:
-                - ResourcePath: /
-                  HttpMethod: POST
-                  MetricsEnabled: 'true'
-                  DataTraceEnabled: 'true'
-                  ThrottlingBurstLimit: '999'
-                - ResourcePath: /
-                  HttpMethod: GET
-                  MetricsEnabled: 'true'
-                  DataTraceEnabled: 'true'
-                  ThrottlingBurstLimit: '999'
+                - ResourcePath:             /
+                  HttpMethod:               POST
+                  MetricsEnabled:           'true'
+                  DataTraceEnabled:         'true'
+                  ThrottlingBurstLimit:     '999'
+                - ResourcePath:             /
+                  HttpMethod:               GET
+                  MetricsEnabled:           'true'
+                  DataTraceEnabled:         'true'
+                  ThrottlingBurstLimit:     '999'
             RestApiId: !Ref "apiGateway"
             StageName: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-APIstage"   
     
@@ -140,34 +140,34 @@ Resources:
         Type: "AWS::Lambda::Function"
         Properties:
             Code:
-                S3Bucket: 'download.cloudberrycode.com'
-                S3Key: 'globalclipboard/Lambda/${GlobalClipboardEnv}/globalclipboard_backend.zip'
-            Description: "Backend Lambda to GlobalClipboard Service"
-            FunctionName: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-backend"
+                S3Bucket:   "download.cloudberrycode.com"
+                S3Key:      !Sub "globalclipboard/Lambda/${GlobalClipboardEnv}/globalclipboard_backend.zip"
+            Description:    "Backend Lambda to GlobalClipboard Service"
+            FunctionName:   !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-backend"
             Environment:
                 Variables:
                    BUCKET_NAME: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-blockbucket-${GlobalClipboardHEXID}"
-            Handler: "Lambda/${GlobalClipboardEnv}/globalclipboard_backend.lambda_handler"
-            MemorySize: 128
-            Role: !GetAtt "GlobalClipboardBackendLambdaIAMRole.Arn"
-            Runtime: "python3.7"
-            Timeout: 10
+            Handler:        !Sub "Lambda/${GlobalClipboardEnv}/globalclipboard_backend.lambda_handler"
+            MemorySize:     128
+            Role:           !GetAtt "GlobalClipboardBackendLambdaIAMRole.Arn"
+            Runtime:        "python3.7"
+            Timeout:        10
 
     lambdaApiGatewayInvokePOST:
         Type: "AWS::Lambda::Permission"
         Properties:
-            Action: "lambda:InvokeFunction"
-            FunctionName: !GetAtt "GlobalClipboardBackendLambda.Arn"
-            Principal: "apigateway.amazonaws.com"
-            SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/POST/"
+            Action:         "lambda:InvokeFunction"
+            FunctionName:   !GetAtt "GlobalClipboardBackendLambda.Arn"
+            Principal:      "apigateway.amazonaws.com"
+            SourceArn:      !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/POST/"
 
     lambdaApiGatewayInvokeGET:
         Type: "AWS::Lambda::Permission"
         Properties:
-            Action: "lambda:InvokeFunction"
-            FunctionName: !GetAtt "GlobalClipboardBackendLambda.Arn"
-            Principal: "apigateway.amazonaws.com"
-            SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/GET/"
+            Action:         "lambda:InvokeFunction"
+            FunctionName:   !GetAtt "GlobalClipboardBackendLambda.Arn"
+            Principal:      "apigateway.amazonaws.com"
+            SourceArn:      !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/GET/"
 
     GlobalClipboardBackendLambdaIAMRole:
         Type: "AWS::IAM::Role"
@@ -229,20 +229,20 @@ Resources:
         Type: "AWS::Lambda::Function"
         Properties:
             Code:
-                S3Bucket: 'download.cloudberrycode.com'
-                S3Key: 'globalclipboard/Lambda/${GlobalClipboardEnv}/globalclipboard_updater.zip'
-            Description: "Backend Lambda to GlobalClipboard Service"
-            FunctionName: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-updater"
+                S3Bucket:   "download.cloudberrycode.com"
+                S3Key:      !Sub "globalclipboard/Lambda/${GlobalClipboardEnv}/globalclipboard_updater.zip"
+            Description:    "Backend Lambda to GlobalClipboard Service"
+            FunctionName:   !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-updater"
             Environment:
                 Variables:
-                    BUCKET_NAME: 'download.cloudberrycode.com'
-                    BUCKET_KEY: 'globalclipboard/Lambda/${GlobalClipboardEnv}/globalclipboard_backend.zip'
-                    LAMBDA_FUNCTION: !Ref GlobalClipboardBackendLambda
-            Handler: "Lambda/${GlobalClipboardEnv}/globalclipboard_updater.lambda_handler"
-            MemorySize: 128
-            Role: !GetAtt "GlobalClipboardUpdaterLambdaIAMRole.Arn"
-            Runtime: "python3.7"
-            Timeout: 10
+                    BUCKET_NAME:        'download.cloudberrycode.com'
+                    BUCKET_KEY:         'globalclipboard/Lambda/${GlobalClipboardEnv}/globalclipboard_backend.zip'
+                    LAMBDA_FUNCTION:    !Ref GlobalClipboardBackendLambda
+            Handler:        "Lambda/${GlobalClipboardEnv}/globalclipboard_updater.lambda_handler"
+            MemorySize:     128
+            Role:           !GetAtt "GlobalClipboardUpdaterLambdaIAMRole.Arn"
+            Runtime:        "python3.7"
+            Timeout:        10
 
     GlobalClipboardUpdaterLambdaIAMRole:
         Type: "AWS::IAM::Role"
@@ -281,5 +281,5 @@ Resources:
     GlobalClipboardUpdaterLambdaLogGroup:
         Type: "AWS::Logs::LogGroup"
         Properties:
-            LogGroupName: !Sub "/aws/lambda/${GlobalClipboardName}-${GlobalClipboardEnv}-update"
+            LogGroupName: !Sub "/aws/lambda/${GlobalClipboardName}-${GlobalClipboardEnv}-updater"
             RetentionInDays: 30
