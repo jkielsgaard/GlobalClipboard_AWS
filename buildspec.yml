@@ -5,7 +5,7 @@ phases:
         commands:
             - echo Building...
             - mkdir LambdaFunctions
-            - mkdir CloudFormation
+            - mkdir CloudFormationScripts
             - zip globalclipboard_backend.zip ./Lambda/globalclipboard_backend.py
             - cp -R globalclipboard_backend.zip LambdaFunctions
             - zip globalclipboard_updater.zip ./Lambda/globalclipboard_updater.py
