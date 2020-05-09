@@ -273,7 +273,7 @@ Resources:
                             - "lambda:UpdateFunctionCode"
                           Effect: "Allow"
                           Resource:
-                            - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${GlobalClipboardName}-${GlobalClipboardEnv}-updater"
+                            - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${GlobalClipboardName}-${GlobalClipboardEnv}-backend"
                   PolicyName: !Sub "${GlobalClipboardName}-${GlobalClipboardEnv}-updater"
 
     GlobalClipboardUpdaterLambdaLogGroup:
