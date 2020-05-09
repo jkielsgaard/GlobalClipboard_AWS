@@ -8,7 +8,7 @@ Parameters:
     GlobalClipboardName:
         Type:           String
         Description:    This parameter will be used on different resources to make this setup unique
-        Default:        "globalclipboard-dev"
+        Default:        "globalclipboard-prod"
     
     GlobalClipboardHEXID:
         Type:           String

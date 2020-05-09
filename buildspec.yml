@@ -10,6 +10,7 @@ phases:
             - zip globalclipboard_updater.zip ./Lambda/globalclipboard_updater.py
             - rm ./Lambda/globalclipboard_updater.py
             - cp -R globalclipboard_updater.zip Lambda
+            - echo build completed...
 artifacts:
     files:
         - Lambda/**/*
