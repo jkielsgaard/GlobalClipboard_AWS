@@ -16,7 +16,7 @@ Parameters:
     GlobalClipboardEnv:
         Type:           String
         Description:    Set env state
-        Default:        "dev"
+        Default:        "prod"
         AllowedValues: [
             "dev",
             "prod"
